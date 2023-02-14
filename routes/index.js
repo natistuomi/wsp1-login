@@ -83,7 +83,7 @@ router.get('/profile', function(req, res, next){
         res.render('profile.njk', { username: req.session.username });
     }
     else{
-        res.json('Access denied')
+        res.status(401).json('Access denied')
     }
 
    
@@ -94,7 +94,7 @@ router.post('/logout', async function(req, res, next){
             req.session.destroy();
             res.redirect('/')
     }else{
-        res.json('Access denied')
+        res.status(401).json('Access denied')
     }
 
 
