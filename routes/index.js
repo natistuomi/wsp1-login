@@ -2,8 +2,8 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const pool = require('../utils/database');
+const session = require('express-session');
 const promisePool = pool.promise();
-var session = require('express-session')
 
 
 /* GET home page. */
@@ -37,6 +37,9 @@ router.post('/login', async function (req, res, next) {
 
             bcrypt.compare(password, bcryptPassword , function(err, result) {
                 if(result){
+                    req.session.loggedin = true;
+                    req.session.username = username;
+    
                     res.redirect('/profile');
                 }else{
                     res.json('Invalid username or password')
@@ -63,20 +66,39 @@ router.post('/login', async function (req, res, next) {
     } */
 });
 
-router.get('/bcrypt/:pwd', function (req, res ,next){
+router.get('/crypt/:pwd', function (req, res ,next){
     
     console.log(req.params.pwd)
 
     bcrypt.hash(req.params.pwd, 10, function (err, hash) {
 
         console.log(hash);
-        return res.json(hash);
+        return res.json({hash});
 
     });
 });
 
 router.get('/profile', function(req, res, next){
-    res.json(':)');
+    if(req.session.loggedin){
+        res.render('profile.njk', { username: req.session.username });
+    }
+    else{
+        res.json('Access denied')
+    }
+
+   
 });
+router.post('/logout', async function(req, res, next){
+    if(req.session.loggedin){
+
+            req.session.destroy();
+            res.redirect('/')
+    }else{
+        res.json('Access denied')
+    }
+
+
+});
+
 
 module.exports = router;
