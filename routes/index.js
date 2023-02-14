@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 const pool = require('../utils/database');
 const promisePool = pool.promise();
+var session = require('express-session')
+
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -34,17 +36,16 @@ router.post('/login', async function (req, res, next) {
             const bcryptPassword = rows[0].password
 
             bcrypt.compare(password, bcryptPassword , function(err, result) {
-                /*res.json({result})*/
                 if(result){
                     res.redirect('/profile');
+                }else{
+                    res.json('Invalid username or password')
                 }
-                else{
-                    res.redirect('/login');
-                }
+          
             });
         }
         else{
-            res.redirect('/login');
+            res.json('Invalid username or password')
         }
         
     }
@@ -74,7 +75,7 @@ router.get('/bcrypt/:pwd', function (req, res ,next){
     });
 });
 
-router.get('/profile/:name', function(req, res, next){
+router.get('/profile', function(req, res, next){
     res.json(':)');
 });
 

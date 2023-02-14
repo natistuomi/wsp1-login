@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "start": "node ./bin/www",
-        "dev": "nodemon -e js,html,njk ./bin/www", 
+        "dev": "nodemon -e js,html,njk ./bin/www",
         "test": "jest",
         "test:watch": "jest --watch",
         "test:1": "jest --watch 1-server",
@@ -19,10 +19,11 @@
         "debug": "~2.6.9",
         "dotenv": "^16.0.3",
         "express": "^4.18.2",
+        "express-session": "^1.17.3",
         "morgan": "~1.9.1",
-        "mysql2": "^3.1.1",
+        "mysql2": "^3.1.2",
         "nunjucks": "^3.2.3",
-        "sass": "^1.58.0"
+        "sass": "^1.58.1"
     },
     "devDependencies": {
         "jest": "^28.1.0",
