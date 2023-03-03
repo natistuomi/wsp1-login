@@ -4,9 +4,6 @@ const session = require('supertest-session');
 const pool = require('../utils/database');
 const bcrypt = require('bcrypt');
 
-const usersTable = process.env.DATABASE_USERSTABLE;
-const [user1, user2] = require('../__mocks__/users');
-
 describe('3. Authentication', () => {
     let testSession = null;
     /** Setup
@@ -16,13 +13,13 @@ describe('3. Authentication', () => {
     beforeAll(async () => {
         testSession = await session(app);
         try {
-            const hash = await bcrypt.hash(user1.password, 10);
+            const hash = await bcrypt.hash('test', 10);
             await pool
                 .promise()
-                .query(
-                    `INSERT INTO ${usersTable} (name, password) VALUES (?,?)`,
-                    [user1.name, hash],
-                );
+                .query(`INSERT INTO hgusers (name, password) VALUES (?,?)`, [
+                    'test',
+                    hash,
+                ]);
         } catch (error) {
             console.log('Something went wrong with database setup: ');
             console.log(error);
@@ -56,8 +53,8 @@ describe('3. Authentication', () => {
          */
         beforeEach(async () => {
             await testSession.post('/login').send({
-                username: user1.name,
-                password: user1.password,
+                username: 'test',
+                password: 'test',
             });
             authenticatedSession = testSession;
         });
@@ -76,9 +73,7 @@ describe('3. Authentication', () => {
             it('should return a html response with a profile page with a username', async () => {
                 expect.assertions(1);
                 const response = await authenticatedSession.get('/profile');
-                expect(response.text).toContain(
-                    `<p>Username: ${user1.name}</p>`,
-                );
+                expect(response.text).toContain('<p>Username: test</p>');
             });
             it('should return a html response with a profile page with a logout button', async () => {
                 expect.assertions(1);
@@ -102,22 +97,14 @@ describe('3. Authentication', () => {
         });
     });
     /** Teardown
-     * After all tests, we delete the users from the database
+     * After all tests, we delete the hgusers from the database
      * and close the session
      * We also close the database connection
      */
     afterAll(async () => {
         try {
-            await pool
-                .promise()
-                .query(`DELETE FROM ${usersTable} WHERE name = ?`, [
-                    user2.name,
-                ]);
-            await pool
-                .promise()
-                .query(`DELETE FROM ${usersTable} WHERE name = ?`, [
-                    user1.name,
-                ]);
+            await pool.promise().query('DELETE FROM hgusers WHERE name = "asdf"');
+            await pool.promise().query('DELETE FROM hgusers WHERE name = "test"');
         } catch (error) {
             console.log('Something went wrong with database cleanup: ');
             console.log(error);

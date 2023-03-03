@@ -4,28 +4,24 @@ const pool = require('../utils/database');
 const { response } = require('../app');
 const bcrypt = require('bcrypt');
 
-const usersTable = process.env.DATABASE_USERSTABLE;
-const [user1, user2] = require('../__mocks__/users');
-
 describe('2. Login', () => {
     /** Setup
      * Before all tests, we create the user in the database
      */
     beforeAll(async () => {
         try {
-            const hash = await bcrypt.hash(user1.password, 10);
+            const hash = await bcrypt.hash('test', 10);
             await pool
                 .promise()
-                .query(
-                    `INSERT INTO ${usersTable} (name, password) VALUES (?,?)`,
-                    [user1.name, hash],
-                );
+                .query(`INSERT INTO hgusers (name, password) VALUES (?,?)`, [
+                    'test',
+                    hash,
+                ]);
         } catch (error) {
             console.log('Something went wrong with database setup: ');
             console.log(error);
         }
     });
-
     describe('GET /login', () => {
         it('should return a 200 response', async () => {
             expect.assertions(1);
@@ -82,7 +78,7 @@ describe('2. Login', () => {
             expect.assertions(2);
             const response = await request(app)
                 .post('/login')
-                .send({ username: user1.name, password: '' });
+                .send({ username: 'test', password: '' });
             expect(response.statusCode).toBe(200);
             expect(response.text).toContain('Password is Required');
         });
@@ -90,7 +86,7 @@ describe('2. Login', () => {
             expect.assertions(2);
             const response = await request(app)
                 .post('/login')
-                .send({ username: user1.name, password: user1.password });
+                .send({ username: 'test', password: 'test' });
             expect(response.statusCode).toBe(302);
             expect(response.header.location).toBe('/profile');
         });
@@ -98,7 +94,7 @@ describe('2. Login', () => {
             expect.assertions(2);
             const response = await request(app)
                 .post('/login')
-                .send({ username: user1.name, password: 'wrong' });
+                .send({ username: 'test', password: 'wrong' });
             expect(response.statusCode).toBe(200);
             expect(response.text).toContain('Invalid username or password');
         });
@@ -109,16 +105,7 @@ describe('2. Login', () => {
      */
     afterAll(async () => {
         try {
-            await pool
-                .promise()
-                .query(`DELETE FROM ${usersTable} WHERE name = ?`, [
-                    user1.name,
-                ]);
-            await pool
-                .promise()
-                .query(`DELETE FROM ${usersTable} WHERE name = ?`, [
-                    user2.name,
-                ]);
+            await pool.promise().query('DELETE FROM hgusers WHERE name = "test"');
         } catch (error) {
             console.log('Something went wrong with database cleanup: ');
             console.log(error);
